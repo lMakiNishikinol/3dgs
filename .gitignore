@@ -1,0 +1,15 @@
+# Dependencies and build output
+node_modules/
+dist/
+tmp/.swc/.artifacts/.wechatide/.mastergo/.codex/.learnings/
+
+# Local/private configuration
+**/project.private.config.json
+.env
+.env.*
+*.pem
+*.key
+
+# Editor and OS files.DS_Store
+.vscode/.idea/
+frontend/src/assets/*reference*

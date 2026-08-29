@@ -1,0 +1,41 @@
+{
+  "name": "wechat-3dgs-program",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Taro React WeChat Mini Program for 3D model showcase and video upload",
+  "scripts": {
+    "dev:weapp": "taro build --type weapp --watch",
+    "build:weapp": "taro build --type weapp",
+    "typecheck": "tsc --noEmit",
+    "generate:backend-contract": "node scripts/generate-backend-openapi-final.mjs",
+    "test:backend-contract": "npm run generate:backend-contract && node --test scripts/test-backend-contract.mjs",
+    "test:backend": "npm run generate:backend-contract && node --test scripts/test-backend-contract.mjs scripts/test-backend-flow.mjs",
+    "postinstall": "node scripts/patch-threejs-miniprogram.cjs"
+  },
+  "dependencies": {
+    "@tarojs/components": "4.2.1",
+    "@tarojs/helper": "4.2.1",
+    "@tarojs/plugin-framework-react": "4.2.1",
+    "@tarojs/react": "4.2.1",
+    "@tarojs/runtime": "4.2.1",
+    "@tarojs/shared": "4.2.1",
+    "@tarojs/taro": "4.2.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "^0.160.0",
+    "threejs-miniprogram": "^0.0.7"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.29.7",
+    "@mastergo/vibe-mcp": "^1.0.28",
+    "@tarojs/cli": "4.2.1",
+    "@tarojs/plugin-platform-weapp": "^4.2.1",
+    "@tarojs/webpack5-runner": "4.2.1",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "babel-preset-taro": "4.2.1",
+    "less": "^4.2.0",
+    "typescript": "^5.7.0"
+  }
+}
