@@ -41,6 +41,7 @@ export interface CommentItem {
   userName: string
   content: string
   likeCount: number
+  likedByMe: boolean
   createdAt: string
 }
 export type OrderStatus = 'pending_payment' | 'pending_production' | 'processing' | 'shipped' | 'completed' | 'cancelled' | 'refunded' | 'failed'
@@ -53,24 +54,25 @@ export interface OrderSummary {
   modelStatus: ModelStatus
   viewerAvailable: boolean
   progress: number
-  paidAmount: number
+  paidAmount: number | null
   createdAt: string
   updatedAt: string
 }
 export interface OrderDetail extends OrderSummary {
   contactEmail: string
-  originalAmount: number
-  discountAmount: number
-  paidAt?: string
-  deliveredAt?: string
+  originalAmount: number | null
+  discountAmount: number | null
+  paidAt: string | null
+  deliveredAt: string | null
   isPublic: boolean
 }
 export interface UserProfile {
   id: string
   name: string
-  company: string
-  email: string
-  bio: string
+  company: string | null
+  email?: string | null
+  bio: string | null
+  avatarUrl: string | null
   modelCount: number
   favoriteCount: number
   followingCount: number

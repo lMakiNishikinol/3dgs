@@ -30,11 +30,6 @@
     "disableUseStrict": false,
     "minifyWXML": true
   },
-  "scripts": {
-    "beforeCompile": "npm run build:weapp",
-    "beforePreview": "npm run build:weapp",
-    "beforeUpload": "npm run build:weapp"
-  },
   "simulatorType": "wechat",
   "simulatorPluginLibVersion": {},
   "condition": {},
@@ -42,7 +37,7 @@
     "tabIndent": "insertSpaces",
     "tabSize": 2
   },
-  "libVersion": "trial",
+  "libVersion": "3.17.1",
   "packOptions": {
     "ignore": [],
     "include": []

@@ -5,7 +5,8 @@
   "description": "Taro React WeChat Mini Program for 3D model showcase and video upload",
   "scripts": {
     "dev:weapp": "taro build --type weapp --watch",
-    "build:weapp": "taro build --type weapp",
+    "build:weapp": "taro build --type weapp && npm run check:weapp",
+    "check:weapp": "node scripts/check-weapp-dist.mjs",
     "typecheck": "tsc --noEmit",
     "generate:backend-contract": "node scripts/generate-backend-openapi-final.mjs",
     "test:backend-contract": "npm run generate:backend-contract && node --test scripts/test-backend-contract.mjs",

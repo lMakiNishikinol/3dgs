@@ -7,6 +7,7 @@ export type UploadStatus = 'prepared' | 'uploading' | 'verifying' | 'completed' 
 
 export interface FieldProblem { field: string; message: string; code: string }
 export interface ApiProblemBody {
+  message?: string
   type: string
   title: string
   status: number
@@ -217,7 +218,7 @@ export interface CommentContract {
 }
 
 export interface ListProductQuery extends PageQuery { keyword?: string; status?: ProductStatus }
-export interface ListOrderQuery extends PageQuery { keyword?: string; status?: OrderSummary['status'] }
+export interface ListOrderQuery extends PageQuery { keyword?: string; status?: OrderSummary['status'] | OrderSummary['status'][] }
 export interface ListModelQuery extends PageQuery {
   keyword?: string
   ownerId?: string

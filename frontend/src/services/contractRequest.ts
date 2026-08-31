@@ -44,7 +44,7 @@ export async function contractRequest<TResponse, TBody = Record<string, unknown>
   if (response.statusCode === 204) return undefined as TResponse
   if (response.statusCode < 200 || response.statusCode >= 300) {
     const problem = response.data as ApiProblemBody
-    throw new ApiProblem(response.statusCode, problem?.code || `HTTP_${response.statusCode}`, problem?.detail || problem?.title || '请求失败', problem?.requestId, problem?.errors)
+    throw new ApiProblem(response.statusCode, String(problem?.code || `HTTP_${response.statusCode}`), problem?.message || problem?.detail || problem?.title || '请求失败', problem?.requestId, problem?.errors)
   }
   const envelope = response.data as ApiEnvelope<TResponse>
   if (envelope.code !== 0) throw new ApiProblem(response.statusCode, 'API_ERROR', envelope.message || '请求失败', envelope.requestId)
@@ -52,8 +52,10 @@ export async function contractRequest<TResponse, TBody = Record<string, unknown>
 }
 
 export function queryString<T extends object>(values: T) {
-  const pairs = Object.entries(values as Record<string, string | number | boolean | undefined>)
-    .filter((entry): entry is [string, string | number | boolean] => entry[1] !== undefined)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+  const pairs = Object.entries(values as Record<string, string | number | boolean | Array<string | number | boolean> | undefined>)
+    .filter((entry) => entry[1] !== undefined)
+    .flatMap(([key, value]) => (Array.isArray(value) ? value : [value]).map((item) =>
+      `${encodeURIComponent(key)}=${encodeURIComponent(String(item))}`
+    ))
   return pairs.length ? '?' + pairs.join('&') : ''
 }

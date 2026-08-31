@@ -13,5 +13,5 @@ export default function InfoPage() {
   const type = useRouter().params.type ?? 'about'
   const current = copy[type] ?? copy.about
   const form = ['feedback', 'email', 'edit'].includes(type)
-  return <View className='page'><PageHeader title={current.title} back /><View className='page-content info-page'><Text className='info-page__body'>{current.body}</Text>{form ? <View className='form-card'>{type === 'feedback' ? <Textarea className='form-textarea' placeholder='请输入反馈内容' maxlength={500} /> : <Input className='form-input' placeholder={type === 'email' ? '请输入邮箱地址' : '请输入新的资料'} />}<Button className='primary-button' onClick={() => void Taro.showToast({ title: '前端演示已保存', icon: 'none' })}>保存</Button></View> : null}</View></View>
+  return <View className='page'><PageHeader title={current.title} back /><View className='page-content info-page'><Text className='info-page__body'>{current.body}</Text>{form ? <View className='form-card'>{type === 'feedback' ? <Textarea className='form-textarea' placeholder='请输入反馈内容' maxlength={500} /> : <Input className='form-input' placeholder={type === 'email' ? '请输入邮箱地址' : '请输入新的资料'} />}<Button className='primary-button' onClick={() => void Taro.showToast({ title: '该功能尚未接入后端', icon: 'none' })}>保存</Button></View> : null}</View></View>
 }

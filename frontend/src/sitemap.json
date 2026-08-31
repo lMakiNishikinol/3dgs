@@ -1,4 +1,9 @@
 {
-  "desc": "3DGS 小程序页面索引",
-  "rules": [{ "action": "allow", "page": "*" }]
+  "desc": "允许开发阶段索引全部页面",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
 }

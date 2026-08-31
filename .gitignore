@@ -1,15 +1,24 @@
-# Dependencies and build output
 node_modules/
 dist/
-tmp/.swc/.artifacts/.wechatide/.mastergo/.codex/.learnings/
-
-# Local/private configuration
-**/project.private.config.json
+tmp/
+.artifacts/
+.swc/
+.wechatide/
+.mastergo/
+.codex/
+.learnings/
+.playwright-cli/
 .env
 .env.*
+**/project.private.config.json
+backend/data/
+backend/uploads/
+backend/public/models/
+backend/test-data/
+backend/test-results/
+frontend/src/assets/*reference*
 *.pem
 *.key
-
-# Editor and OS files.DS_Store
-.vscode/.idea/
-frontend/src/assets/*reference*
+*.mp4
+*.bin
+*.glb

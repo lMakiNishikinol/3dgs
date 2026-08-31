@@ -1,0 +1,22 @@
+{
+  "name": "3dmodel-api",
+  "version": "1.0.0",
+  "description": "跨境电商 AI 商品三维化小程序后端 (Phase 1)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "prepare:local": "node scripts/prepare-local-env.js",
+    "test:local-tools": "node tests/local_tools_test.js",
+    "seed:test": "node scripts/seed-test-data.js",
+    "test:social": "node tests/social_guest_test.js",
+    "test:orders": "node tests/order_status_filter_test.js",
+    "test:data-integrity": "node tests/data_integrity_test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

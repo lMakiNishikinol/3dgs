@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import Taro from '@tarojs/taro'
 import { ScrollView, Switch, Text, View } from '@tarojs/components'
 import { PageHeader } from '@/components/PageHeader'
-import { fetchOrderDetail } from '@/services/orders'
+import { LoginPrompt } from '@/components/LoginPrompt'
+import { fetchOrderDetail, updateOrderVisibility } from '@/services/orders'
 import type { OrderDetail, OrderStatus } from '@/types/api'
 
 const labels: Record<OrderStatus, string> = {
@@ -16,21 +17,23 @@ const labels: Record<OrderStatus, string> = {
   failed: '生产失败'
 }
 
-function amount(value: number) {
+function amount(value: number | null) {
+  if (value == null) return '--'
   return '￥ ' + value.toFixed(2).replace('.00', '')
 }
 
-function displayTime(value?: string) {
+function displayTime(value?: string | null) {
   if (!value) return '--'
   return value.replace('T', ' ').replace('.000Z', '').replace('Z', '')
 }
 
-export default function OrderDetailPage() {
+function OrderDetailContent() {
   const orderId = Taro.getCurrentInstance().router?.params.id || 'order-00001'
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isPublic, setIsPublic] = useState(false)
+  const [visibilitySaving, setVisibilitySaving] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -51,6 +54,23 @@ export default function OrderDetailPage() {
   const openViewer = () => {
     if (!order) return
     void Taro.navigateTo({ url: `/subpackage-lab/model-viewer/index?modelId=${encodeURIComponent(order.modelId)}` })
+  }
+
+  const changeVisibility = async (nextValue: boolean) => {
+    if (!order || visibilitySaving) return
+    const previous = isPublic
+    setIsPublic(nextValue)
+    setVisibilitySaving(true)
+    try {
+      const updated = await updateOrderVisibility(order.id, nextValue)
+      setOrder(updated)
+      setIsPublic(updated.isPublic)
+    } catch (reason) {
+      setIsPublic(previous)
+      await Taro.showToast({ title: reason instanceof Error ? reason.message : '公开状态更新失败', icon: 'none' })
+    } finally {
+      setVisibilitySaving(false)
+    }
   }
 
   return (
@@ -81,9 +101,25 @@ export default function OrderDetailPage() {
             <View className='order-detail-row'><Text>交付时间：{displayTime(order.deliveredAt)}</Text></View>
           </View>
           {order.modelStatus === 'ready' && order.viewerAvailable ? <View className='order-viewer-entry tap-feedback' onClick={openViewer}><View className='order-viewer-entry__icon'><Text>3D</Text></View><View className='order-viewer-entry__copy'><Text className='order-viewer-entry__title'>查看 3D 模型</Text><Text className='order-viewer-entry__sub'>模型已生成完成</Text></View><Text className='order-viewer-entry__arrow'>›</Text></View> : null}
-          <View className='order-public-row'><Text>作品公开状态</Text><Switch checked={isPublic} color='#9356a7' onChange={(event) => setIsPublic(event.detail.value)} /></View>
+          <View className='order-public-row'><Text>作品公开状态</Text><Switch disabled={visibilitySaving} checked={isPublic} color='#9356a7' onChange={(event) => void changeVisibility(event.detail.value)} /></View>
         </View> : null}
       </ScrollView>
     </View>
   )
+}
+
+export default function OrderDetailPage() {
+  const loggedIn = Boolean(Taro.getStorageSync<string>('accessToken'))
+  if (loggedIn) return <OrderDetailContent />
+  return <View className='page page--locked order-detail-page'>
+    <PageHeader title='订单详细' back />
+    <View className='protected-page-backdrop'>登录后查看订单详情</View>
+    <LoginPrompt
+      visible
+      title='登录后查看订单'
+      message='订单详情和已生成模型仅对购买账号开放。'
+      cancelLabel='返回首页'
+      onCancel={() => void Taro.redirectTo({ url: '/pages/home/index' })}
+    />
+  </View>
 }

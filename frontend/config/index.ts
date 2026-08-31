@@ -1,12 +1,11 @@
 import path from 'node:path'
 import { defineConfig } from '@tarojs/cli'
 
+const backendEnv = {} as Record<string, string>
 const apiBaseUrl = process.env.TARO_APP_API_BASE_URL ?? ''
-const localViewerSeeds = [
-  'Box', 'BoxAnimated', 'BoxInterleaved', 'BoxTextured',
-  'AnimatedMorphCube', 'DirectionalLight', 'EmissiveStrengthTest',
-  'RiggedFigure', 'RiggedSimple', 'TextureSettingsTest', 'UnlitTest', 'VertexColorTest'
-]
+const enableTestLogin = process.env.TARO_APP_ENABLE_TEST_LOGIN !== undefined
+  ? process.env.TARO_APP_ENABLE_TEST_LOGIN === 'true'
+  : false
 
 export default defineConfig({
   projectName: 'wechat-3dgs-program',
@@ -22,18 +21,24 @@ export default defineConfig({
   },
   cache: { enable: true },
   defineConstants: {
-    __API_BASE_URL__: JSON.stringify(apiBaseUrl)
+    __API_BASE_URL__: JSON.stringify(apiBaseUrl),
+    __ENABLE_TEST_LOGIN__: JSON.stringify(enableTestLogin)
   },
   copy: {
-    patterns: apiBaseUrl ? [] : localViewerSeeds.map((name) => ({
-      from: path.resolve(__dirname, '..', 'backend-seed', 'glb', `${name}.glb`),
-      to: `dist/subpackage-lab/seed-assets/${name}.glb`
-    })),
+    patterns: [
+      {
+        from: 'src/sitemap.json',
+        to: 'dist/sitemap.json'
+      }
+    ],
     options: {}
   },
   mini: {
     webpackChain(chain) {
       chain.module.noParse(/threejs-miniprogram[\\/]dist[\\/]index\.js$/)
+      // 微信分包单包限制为 2 MiB；Three.js 已位于按需加载的独立分包中。
+      // 关闭 Webpack 面向网页的 244 KiB 通用提示，实际包体由 check:weapp 严格校验。
+      chain.performance.hints(false)
     },
     optimizeMainPackage: { enable: true },
     postcss: {

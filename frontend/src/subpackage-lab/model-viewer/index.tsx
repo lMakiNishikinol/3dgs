@@ -14,6 +14,7 @@ type LoadingStage = 'idle' | 'requesting' | 'downloading' | 'reading' | 'texture
 type ControlMode = 'orbit' | 'rotate-x' | 'rotate-y' | 'rotate-z' | 'move-y'
 type AxisKey = 'x' | 'y' | 'z'
 type AxisVisibility = Record<AxisKey, boolean>
+type SourceMode = 'product' | 'local'
 type ModelMeta = {
   name: string
   size: number
@@ -139,6 +140,7 @@ export default function ModelViewerPage() {
   const router = useRouter()
   const runtime = useRef<ViewerRuntime | null>(null)
   const downloadedFile = useRef('')
+  const sourceRequestId = useRef(0)
   const [status, setStatus] = useState<ViewerStatus>('loading')
   const [loadingStage, setLoadingStage] = useState<LoadingStage>('requesting')
   const [meta, setMeta] = useState<ModelMeta | null>(null)
@@ -153,12 +155,24 @@ export default function ModelViewerPage() {
   const lastRotationReportAt = useRef(0)
   const [errorMessage, setErrorMessage] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
+  const [sourceMode, setSourceMode] = useState<SourceMode>('product')
+  const [sourceRevision, setSourceRevision] = useState(0)
+  const [selectingLocal, setSelectingLocal] = useState(false)
   const [sourcePath, setSourcePath] = useState('')
   const [sourceName, setSourceName] = useState('model.glb')
   const [expectedSize, setExpectedSize] = useState(0)
   const [loadedSize, setLoadedSize] = useState(0)
   const modelId = router.params.modelId ? decodeURIComponent(router.params.modelId) : ''
   const displayedSize = meta?.size || loadedSize || expectedSize
+  const [menuButtonReserve] = useState(() => {
+    try {
+      const rect = Taro.getMenuButtonBoundingClientRect()
+      const width = Taro.getWindowInfo().windowWidth
+      return Math.max(76, Math.ceil(width - rect.left + 8))
+    } catch {
+      return 88
+    }
+  })
 
   const syncRotationReadout = (viewer: ViewerRuntime, force = false) => {
     viewer.readoutEuler.setFromQuaternion(viewer.orientation, 'XYZ')
@@ -174,8 +188,11 @@ export default function ModelViewerPage() {
   useEffect(() => () => unlinkQuietly(downloadedFile.current), [])
 
   useEffect(() => {
+    if (sourceMode !== 'product') return undefined
     let cancelled = false
     let task: any
+    const requestId = ++sourceRequestId.current
+    const stale = () => cancelled || requestId !== sourceRequestId.current
 
     const requestAndDownload = async () => {
       setStatus('loading')
@@ -192,33 +209,31 @@ export default function ModelViewerPage() {
       }
       try {
         const asset = await fetchViewerAsset(modelId)
-        if (cancelled) return
+        if (stale()) return
         if (asset.format !== 'glb') throw new Error('MODEL_FORMAT_UNSUPPORTED')
-        if (Date.parse(asset.expiresAt) <= Date.now()) throw new Error('MODEL_SIGNATURE_EXPIRED')
+        if (asset.expiresAt && Date.parse(asset.expiresAt) <= Date.now()) throw new Error('MODEL_SIGNATURE_EXPIRED')
         setSourceName(asset.fileName || `${modelId}.glb`)
         setExpectedSize(asset.fileSize || 0)
-        if (asset.localPath) {
-          setLoadingStage('reading')
-          setSourcePath(asset.localPath)
-          return
-        }
         setLoadingStage('downloading')
         const download = await new Promise<any>((resolve, reject) => {
           task = Taro.downloadFile({
             url: asset.modelUrl,
             timeout: 60000,
+            header: {
+              ...(Taro.getStorageSync<string>('accessToken') ? { authorization: 'Bearer ' + Taro.getStorageSync<string>('accessToken') } : {})
+            },
             success: resolve,
             fail: reject
           })
         })
-        if (cancelled) return
+        if (stale()) return
         if (download.statusCode < 200 || download.statusCode >= 300) throw new Error(`MODEL_DOWNLOAD_HTTP_${download.statusCode}`)
         if (!download.tempFilePath) throw new Error('MODEL_DOWNLOAD_EMPTY')
         unlinkQuietly(downloadedFile.current)
         downloadedFile.current = download.tempFilePath
         setSourcePath(download.tempFilePath)
       } catch (error) {
-        if (cancelled) return
+        if (stale()) return
         console.error('[GLBViewer] asset request/download failed', { modelId, message: errorText(error) })
         const message = errorText(error)
         const friendly = message.includes('MODEL_ASSET_NOT_READY') ? '模型仍在生成，请稍后重试'
@@ -236,7 +251,7 @@ export default function ModelViewerPage() {
       cancelled = true
       task?.abort?.()
     }
-  }, [modelId, reloadKey])
+  }, [modelId, reloadKey, sourceMode])
 
   useEffect(() => {
     if (!sourcePath) return undefined
@@ -471,7 +486,7 @@ export default function ModelViewerPage() {
       viewer?.renderer?.dispose()
       runtime.current = null
     }
-  }, [sourceName, sourcePath])
+  }, [sourceName, sourcePath, sourceRevision])
 
   const clampDistance = (viewer: ViewerRuntime, distance: number) => Math.max(viewer.fitDistance * 0.15, Math.min(viewer.fitDistance * 5, distance))
   const zoom = (direction: number) => {
@@ -604,11 +619,63 @@ export default function ModelViewerPage() {
     viewer.lastArcball = touch && controlMode === 'orbit' ? arcballPoint(touch, viewer) : undefined
   }
 
+  const chooseLocalGlb = async () => {
+    if (selectingLocal) return
+    setSelectingLocal(true)
+    try {
+      const result = await Taro.chooseMessageFile({
+        count: 1,
+        type: 'file',
+        extension: ['glb']
+      })
+      const file = (result as any)?.tempFiles?.[0]
+      if (!file) return
+      const localName = String(file.name || 'local-model.glb').trim()
+      const localPath = String(file.path || file.tempFilePath || '')
+      if (!localName.toLowerCase().endsWith('.glb')) {
+        void Taro.showToast({ title: '请选择 GLB 文件', icon: 'none' })
+        return
+      }
+      if (!localPath) throw new Error('LOCAL_GLB_PATH_EMPTY')
+
+      sourceRequestId.current += 1
+      setSourceMode('local')
+      setSourceName(localName)
+      setExpectedSize(Math.max(0, Number(file.size) || 0))
+      setLoadedSize(0)
+      setMeta(null)
+      setErrorMessage('')
+      setStatus('loading')
+      setLoadingStage('reading')
+      setSourcePath(localPath)
+      setSourceRevision((value) => value + 1)
+    } catch (error) {
+      const message = errorText(error)
+      if (/cancel/i.test(message)) return
+      console.error('[GLBViewer] local file selection failed', error)
+      void Taro.showToast({ title: `选择失败：${message.slice(0, 24)}`, icon: 'none' })
+    } finally {
+      setSelectingLocal(false)
+    }
+  }
+
   const loadingLabel = STAGE_LABELS[loadingStage]
+  const sourceLabel = sourceMode === 'local' ? '本机测试文件' : '商品模型'
   return <View className='page model-viewer-page'>
     <View className='model-viewer-topbar'>
       <View className='model-viewer-back' onClick={() => void Taro.navigateBack()}><Text>‹</Text></View>
-      <View><Text className='model-viewer-brand__eyebrow'>3D MODEL</Text><Text className='model-viewer-brand__title'>模型查看器</Text></View>
+      <View className='model-viewer-brand'><Text className='model-viewer-brand__eyebrow'>3D MODEL</Text><Text className='model-viewer-brand__title'>模型查看器</Text></View>
+      <View
+        className={`model-viewer-local-trigger ${selectingLocal ? 'is-loading' : ''}`}
+        style={{ marginRight: `${menuButtonReserve}px` }}
+        hoverClass='is-pressed'
+        ariaRole='button'
+        ariaLabel='选择本机 GLB 测试文件'
+        onClick={() => void chooseLocalGlb()}
+      >
+        <Text className='model-viewer-local-trigger__label'>{selectingLocal ? '选择中' : '本机 GLB'}</Text>
+        <Text className='model-viewer-local-trigger__badge'>TEST</Text>
+      </View>
     </View>
 
     <View className='model-viewer-workspace'>
@@ -632,7 +699,7 @@ export default function ModelViewerPage() {
           <Text className='model-viewer-empty__mark'>◈</Text>
           <Text className='model-viewer-empty__title'>模型暂不可用</Text>
           <Text className='model-viewer-empty__copy'>{errorMessage}</Text>
-          <View className='model-viewer-empty__retry' onClick={() => setReloadKey((value) => value + 1)}><Text>重新获取</Text></View>
+          <View className='model-viewer-empty__retry' onClick={() => sourceMode === 'local' ? void chooseLocalGlb() : setReloadKey((value) => value + 1)}><Text>{sourceMode === 'local' ? '重新选择' : '重新获取'}</Text></View>
         </View>}
         {status === 'loading' && <View className='model-viewer-empty model-viewer-loading'><Text className='model-viewer-loading__dot'>◈</Text><Text>{loadingLabel}</Text><Text className='model-viewer-empty__copy'>{sourceName}{displayedSize ? ` · ${(displayedSize / 1048576).toFixed(1)} MB` : ''}</Text></View>}
       </View>
@@ -655,7 +722,7 @@ export default function ModelViewerPage() {
       </View>
     </View>
     <View className='model-viewer-bottom'>
-      <View><Text>{meta?.name || sourceName}</Text><Text className='model-viewer-sub'>{meta ? `${(meta.size / 1048576).toFixed(1)} MB · GLB ${meta.version}` : displayedSize ? `${(displayedSize / 1048576).toFixed(1)} MB · ${loadingLabel}` : '等待模型资源'}</Text></View>
+      <View><Text>{meta?.name || sourceName}</Text><Text className='model-viewer-sub'>{meta ? `${(meta.size / 1048576).toFixed(1)} MB · GLB ${meta.version} · ${sourceLabel}` : displayedSize ? `${(displayedSize / 1048576).toFixed(1)} MB · ${loadingLabel} · ${sourceLabel}` : `等待模型资源 · ${sourceLabel}`}</Text></View>
       <View className='model-viewer-toggle' onClick={() => setShowInfo((value) => !value)}><Text>{showInfo ? '隐藏信息' : '模型信息'}</Text></View>
     </View>
     {showInfo && <View className='model-viewer-info'>

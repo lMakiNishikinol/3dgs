@@ -21,6 +21,18 @@ export async function loginWithWechat(profile?: { name?: string; avatarUrl?: str
   return tokens
 }
 
+/** 仅供本地联调；生产构建不要保存或调用测试登录密钥。 */
+export async function loginForLocalTest(testLoginKey: string, userId = 'test-user-001'): Promise<AuthTokens> {
+  const tokens = await contractRequest<AuthTokens, { userId: string; name: string }>({
+    path: '/v1/auth/test/login', method: 'POST', authenticated: false,
+    header: { 'x-test-login-key': testLoginKey },
+    data: { userId, name: '本地联调用户' }
+  })
+  Taro.setStorageSync('accessToken', tokens.accessToken)
+  Taro.setStorageSync('refreshToken', tokens.refreshToken)
+  return tokens
+}
+
 export async function refreshAccessToken(): Promise<AuthTokens> {
   const refreshToken = Taro.getStorageSync<string>('refreshToken')
   const tokens = await contractRequest<AuthTokens, { refreshToken: string }>({
@@ -92,19 +104,19 @@ export const updateModel = (modelId: string, version: number, patch: { title?: s
   contractRequest({ path: `/v1/models/${encodeURIComponent(modelId)}`, method: 'PATCH', data: patch, header: versionHeader(version) })
 export const getViewerAsset = (modelId: string): Promise<ViewerAssetContract> =>
   contractRequest({ path: `/v1/models/${encodeURIComponent(modelId)}/viewer` })
-export const favoriteModel = (modelId: string): Promise<void> =>
+export const favoriteModel = (modelId: string): Promise<{ favorited: boolean; favoriteCount: number }> =>
   contractRequest({ path: `/v1/models/${encodeURIComponent(modelId)}/favorite`, method: 'PUT' })
-export const unfavoriteModel = (modelId: string): Promise<void> =>
+export const unfavoriteModel = (modelId: string): Promise<{ favorited: boolean; favoriteCount: number }> =>
   contractRequest({ path: `/v1/models/${encodeURIComponent(modelId)}/favorite`, method: 'DELETE' })
 export const listModelComments = (modelId: string, page: number, pageSize: number): Promise<CommentPage> =>
   contractRequest({ path: `/v1/models/${encodeURIComponent(modelId)}/comments` + queryString({ page, pageSize }) })
 export const createModelComment = (modelId: string, content: string, key: string): Promise<CommentContract> =>
   contractRequest({ path: `/v1/models/${encodeURIComponent(modelId)}/comments`, method: 'POST', data: { content }, header: idempotency(key) })
-export const deleteComment = (commentId: string): Promise<void> =>
+export const deleteComment = (commentId: string): Promise<{ deleted: boolean; commentId: string }> =>
   contractRequest({ path: `/v1/comments/${encodeURIComponent(commentId)}`, method: 'DELETE' })
-export const likeComment = (commentId: string): Promise<void> =>
+export const likeComment = (commentId: string): Promise<CommentContract> =>
   contractRequest({ path: `/v1/comments/${encodeURIComponent(commentId)}/like`, method: 'PUT' })
-export const unlikeComment = (commentId: string): Promise<void> =>
+export const unlikeComment = (commentId: string): Promise<CommentContract> =>
   contractRequest({ path: `/v1/comments/${encodeURIComponent(commentId)}/like`, method: 'DELETE' })
 
 export const listNotifications = (page: number, pageSize: number, unreadOnly = false): Promise<NotificationPage> =>

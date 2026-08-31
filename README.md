@@ -1,8 +1,8 @@
 # 3dgs
 
-3DGS WeChat Mini Program project.
+3D Gaussian Splatting WeChat mini-program project.
 
-- `frontend/`: client application source and documentation
-- `backend/`: reserved for backend services
+- `frontend/`: WeChat mini-program frontend
+- `backend/`: backend service and API integration
 
-Private local configuration, build output, dependencies, temporary files, and credentials are intentionally excluded.
+The public repository excludes local dependencies, build artifacts, runtime data, uploaded files, model binaries, private configuration, and credentials. Copy `backend/.env.example` to `.env` and fill in local secrets before running the backend.

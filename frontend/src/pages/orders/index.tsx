@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import Taro from '@tarojs/taro'
 import { Input, ScrollView, Text, View } from '@tarojs/components'
 import { BottomNav } from '@/components/BottomNav'
+import { LoginPrompt } from '@/components/LoginPrompt'
 import { PageHeader } from '@/components/PageHeader'
 import { Pagination } from '@/components/Pagination'
 import { usePagedResource } from '@/hooks/usePagedResource'
@@ -28,8 +29,29 @@ const labels: Record<OrderStatus, string> = {
   failed: '生产失败'
 }
 
-function amount(value: number) {
+const statusGroups: Record<'all' | OrderStatus, OrderStatus[] | undefined> = {
+  all: undefined,
+  pending_payment: ['pending_payment'],
+  pending_production: ['pending_production'],
+  processing: ['processing'],
+  shipped: ['shipped', 'completed'],
+  completed: ['completed'],
+  cancelled: ['cancelled', 'refunded', 'failed'],
+  refunded: ['refunded'],
+  failed: ['failed']
+}
+
+function amount(value: number | null) {
+  if (value == null) return '--'
   return '￥ ' + value.toFixed(2).replace('.00', '')
+}
+
+function actionLabel(order: OrderSummary) {
+  if (order.status === 'pending_payment') return '继续支付'
+  if (order.status === 'completed' && order.viewerAvailable) return '查看模型'
+  if (order.status === 'shipped') return '查看交付'
+  if (['cancelled', 'refunded', 'failed'].includes(order.status)) return '查看详情'
+  return '查看进度'
 }
 
 function OrderCard({ order, onOpen }: { order: OrderSummary; onOpen: () => void }) {
@@ -51,13 +73,13 @@ function OrderCard({ order, onOpen }: { order: OrderSummary; onOpen: () => void 
       </View>
       <View className='order-card__footer'>
         <Text className='order-card__amount'>实付：{amount(order.paidAmount)}</Text>
-        <Text className='order-card__action'>{order.status === 'pending_payment' ? '继续支付' : '查看进度'}</Text>
+        <Text className='order-card__action'>{actionLabel(order)}</Text>
       </View>
     </View>
   )
 }
 
-export default function OrdersPage() {
+function OrdersContent() {
   const [draftKeyword, setDraftKeyword] = useState('')
   const [keyword, setKeyword] = useState('')
   const [status, setStatus] = useState<'all' | OrderStatus>('all')
@@ -65,7 +87,7 @@ export default function OrdersPage() {
     page,
     pageSize,
     keyword,
-    status: status === 'all' ? undefined : status
+    status: statusGroups[status]
   }), [keyword, status])
   const paged = usePagedResource(loader, 2)
   const applySearch = () => { paged.setPage(1); setKeyword(draftKeyword.trim()) }
@@ -99,4 +121,21 @@ export default function OrdersPage() {
       <BottomNav active='orders' />
     </View>
   )
+}
+
+export default function OrdersPage() {
+  const loggedIn = Boolean(Taro.getStorageSync<string>('accessToken'))
+  if (loggedIn) return <OrdersContent />
+  return <View className='page page--with-tabs page--locked orders-page'>
+    <PageHeader title='订单管理' titleAlign='left' />
+    <View className='protected-page-backdrop'><View className='orders-empty__gift'>◇</View><Text>登录后查看建模订单</Text></View>
+    <BottomNav active='orders' />
+    <LoginPrompt
+      visible
+      title='登录后查看订单'
+      message='订单包含您购买的商品、建模进度和已生成模型，需要登录后查看。'
+      cancelLabel='返回首页'
+      onCancel={() => void Taro.redirectTo({ url: '/pages/home/index' })}
+    />
+  </View>
 }

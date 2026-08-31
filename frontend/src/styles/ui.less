@@ -27,3 +27,20 @@
 .model-viewer-entry__sub,.order-viewer-entry__sub{display:block;margin-top:3px;color:rgba(255,255,255,.75);font-size:10px}
 .model-viewer-entry__arrow,.order-viewer-entry__arrow{margin-left:10px;font-size:24px;line-height:1}
 .order-viewer-entry{margin-top:20px;border-radius:0;background:linear-gradient(135deg,#4b3260,#9356a7);box-shadow:none}
+
+/* 登录边界与真实社交交互 */
+.login-prompt-mask{position:fixed;z-index:180;inset:0;padding:24px;display:flex;align-items:center;justify-content:center;background:rgba(23,19,25,.54)}
+.login-prompt-card{width:100%;max-width:340px;padding:28px 22px 20px;box-sizing:border-box;border-radius:18px;background:#fff;box-shadow:0 18px 56px rgba(31,19,36,.24);text-align:center}
+.login-prompt-mark{width:58px;height:58px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#f0e7f3}
+.login-prompt-mark__person{width:20px;height:20px;position:relative;border-radius:50%;background:#9356a7}
+.login-prompt-mark__person::after{content:'';width:34px;height:17px;position:absolute;left:-7px;top:23px;border-radius:18px 18px 8px 8px;background:#9356a7}
+.login-prompt-title,.login-prompt-copy{display:block}.login-prompt-title{color:#2f2731;font-size:19px;font-weight:700}.login-prompt-copy{margin-top:10px;color:#756d77;font-size:13px;line-height:1.65}
+.login-prompt-actions{margin-top:22px;display:flex;gap:10px}.login-prompt-button{height:42px;display:flex;align-items:center;justify-content:center;flex:1;border-radius:10px;font-size:14px;line-height:42px}.login-prompt-button::after{border:0}.login-prompt-button--muted{background:#f0edef;color:#5e575f}.login-prompt-button--primary{background:#9356a7;color:#fff}.login-prompt-button:active{transform:scale(.98)}
+.protected-page-backdrop{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#8a818b;font-size:14px}
+
+.detail-title-copy{min-width:0;padding-right:12px;flex:1}.favorite-button{min-width:64px;height:42px;padding:5px 12px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #ded1e2;border-radius:10px;color:#9356a7}.favorite-button.is-active{border-color:#9356a7;background:#f0e7f3}.favorite-button text{display:block}.favorite-button__count{margin-top:1px;font-size:9px;opacity:.72}
+.comment-composer{display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;background:#fff}.comment-composer__input{height:38px;min-width:0;padding:0 12px;box-sizing:border-box;flex:1;border-radius:9px;background:#f3f1f3;font-size:13px}.comment-composer__button{width:68px;height:38px;margin:0;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#9356a7;color:#fff;font-size:13px;line-height:38px}.comment-composer__button::after{border:0}
+.comment-row{grid-template-columns:38px minmax(0,1fr) 42px}.comment-row__main{min-width:0}.comment-row__like{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#8b828c;font-size:10px}.comment-row__like.is-active{color:#9356a7}.comment-row__heart{font-size:18px;line-height:18px}.comment-empty{padding:36px 0;text-align:center;color:#8b828c;font-size:12px}
+.mg-upload-card__failure-actions{width:100%;margin-top:16px}.mg-upload-card__failure-actions .mg-upload-button{min-width:0;flex:1}
+
+@media (prefers-reduced-motion:reduce){.login-prompt-button:active{transform:none}}

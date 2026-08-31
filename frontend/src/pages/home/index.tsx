@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react'
-import Taro from '@tarojs/taro'
+import { useCallback, useRef, useState } from 'react'
+import Taro, { useDidShow } from '@tarojs/taro'
 import { Input, ScrollView, Text, View } from '@tarojs/components'
 import { BottomNav } from '@/components/BottomNav'
 import { ModelGrid } from '@/components/ModelGrid'
@@ -14,6 +14,11 @@ export default function HomePage() {
   const [keyword, setKeyword] = useState('')
   const loader = useCallback((page: number, pageSize: number) => fetchModels({ page, pageSize, keyword, sort: 'popular' }), [keyword])
   const paged = usePagedResource(loader, 8)
+  const hasShown = useRef(false)
+  useDidShow(() => {
+    if (hasShown.current) paged.refresh()
+    else hasShown.current = true
+  })
   const openModel = (model: ModelSummary) => void Taro.navigateTo({ url: '/pages/model-detail/index?id=' + encodeURIComponent(model.id) })
   const search = () => { paged.setPage(1); setKeyword(draftKeyword.trim()) }
 

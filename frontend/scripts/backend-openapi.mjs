@@ -24,7 +24,11 @@ const parameters = {
   CommentId: { name: 'commentId', in: 'path', required: true, schema: uuid },
   NotificationId: { name: 'notificationId', in: 'path', required: true, schema: uuid },
   ProductStatusFilter: { name: 'status', in: 'query', schema: schemaRef('ProductStatus') },
-  OrderStatusFilter: { name: 'status', in: 'query', schema: schemaRef('OrderStatus') },
+  OrderStatusFilter: {
+    name: 'status', in: 'query', style: 'form', explode: true,
+    description: '可重复传入多个订单状态；任一状态匹配即返回。',
+    schema: { type: 'array', items: schemaRef('OrderStatus') }
+  },
   ModelStatusFilter: { name: 'status', in: 'query', schema: schemaRef('ModelStatus') },
   ModelOwnerFilter: { name: 'ownerId', in: 'query', schema: uuid },
   FavoriteFilter: { name: 'favoriteBy', in: 'query', schema: { type: 'string', enum: ['me'] } },

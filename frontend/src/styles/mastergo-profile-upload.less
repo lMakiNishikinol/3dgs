@@ -7,12 +7,14 @@
 .mg-bell::after{content:'';width:6px;height:2px;position:absolute;left:2px;bottom:-4px;border-radius:2px;background:#222}
 .mg-profile-summary{height:82px;padding:4px 37px;display:flex;align-items:flex-start;position:relative;background:#fff}
 .mg-avatar{width:64px;height:64px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border-radius:50%;color:#fff;font-size:23px;font-weight:700;background:linear-gradient(145deg,#d8bb9c,#7c5741)}
+.mg-avatar__image{width:100%;height:100%;display:block}
 .mg-avatar--self{background:linear-gradient(145deg,#d6a27f,#342b2d)}
 .mg-profile-summary__copy{min-width:0;margin-left:10px;flex-grow:1}
 .mg-profile-summary__name-row{height:34px;display:flex;align-items:center}
 .mg-profile-summary__name{max-width:104px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:24px;font-weight:700}
 .mg-company-tag{height:25px;margin-left:7px;padding:0 6px;display:flex;align-items:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border:1px solid #40c1d9;border-radius:5px;color:#24a8bf;font-size:11px}
 .mg-profile-summary__email{display:block;max-width:180px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:16px;line-height:28px}
+.mg-login-actions{height:52px;margin:8px 24px -60px;display:flex;align-items:center;gap:8px}.mg-login-actions button{margin:0;flex-shrink:0}.mg-login-key{min-width:80px;height:30px;padding:0 8px;flex:1;border:1px solid #ddd;border-radius:5px;font-size:12px}
 .mg-settings{width:40px;height:54px;position:absolute;right:15px;top:12px;display:flex;align-items:center;justify-content:center}
 .mg-settings__gear{width:20px;height:20px;position:relative;border:3px dotted #222;border-radius:50%}.mg-settings__gear::after{content:'';width:6px;height:6px;position:absolute;left:4px;top:4px;border:1px solid #222;border-radius:50%;background:#fff}
 .mg-profile-menu{margin-top:80px;padding-left:32px;background:#fff}
@@ -30,7 +32,7 @@
 .mg-edit-avatar{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#bdbdbd;color:#fff;font-size:11px}
 
 .mg-creator-header{height:98px;background:#fff}
-.mg-creator-summary{height:76px;padding:0 37px;display:flex;align-items:center;background:#fff}
+.mg-creator-summary{height:76px;padding:4px 37px 0;display:flex;align-items:flex-start;background:#fff}
 .mg-avatar--creator{background:linear-gradient(145deg,#f1d8b0,#73594e)}
 .mg-avatar--seed-1{background:linear-gradient(145deg,#aec3db,#455b74)}
 .mg-avatar--seed-2{background:linear-gradient(145deg,#dcc2ec,#775889)}
@@ -41,26 +43,28 @@
 .mg-avatar--seed-7{background:linear-gradient(145deg,#b9dfd5,#4b776c)}
 .mg-avatar--seed-8{background:linear-gradient(145deg,#d0d0d0,#4e4e4e)}
 .mg-avatar--seed-9{background:linear-gradient(145deg,#d6edf1,#5a7d83)}
-.mg-creator-summary__copy{min-width:0;margin-left:18px}
+.mg-creator-summary__copy{min-width:0;margin-left:18px;padding-top:2px}
 .mg-creator-summary__name{display:block;max-width:190px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:24px;font-weight:700;line-height:34px}
-.mg-creator-summary .mg-company-tag{max-width:170px;margin-left:26px}
-.mg-creator-divider{height:6px;background:#f1f1f1}
+.mg-creator-summary .mg-company-tag{max-width:170px;margin-left:26px;border-color:#03a9f5;color:#3d3d3d}
+.mg-creator-divider{height:6px;background:#d8d8d8}
 .mg-creator-scroll{height:calc(100vh - 180px);background:#fff}
 .mg-creator-grid{padding:18px 28px 0;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start}
-.mg-creator-card{width:156px;height:241px;margin-bottom:17px;flex-shrink:0;background:#fff}
-.mg-creator-card__preview{width:130px;height:144px;margin:0 auto;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.mg-creator-card{width:156px;height:241px;margin-bottom:17px;overflow:hidden;flex-shrink:0;border-radius:13px;background:#fff}
+.mg-creator-card__preview{width:130px;height:98px;margin:37px auto 0;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .mg-creator-card__orb{width:76px;height:96px;border-radius:46% 54% 42% 58%;background:linear-gradient(140deg,rgba(255,255,255,.9),rgba(255,255,255,.08));box-shadow:inset -13px -18px 22px rgba(0,0,0,.16),0 12px 24px rgba(0,0,0,.15);transform:rotate(12deg)}
-.mg-creator-card__title{height:52px;padding:8px 7px 0;display:block;overflow:hidden;text-align:center;font-size:15px;font-weight:700;line-height:22px}
+.mg-creator-card__title{height:57px;padding:13px 7px 0;display:block;overflow:hidden;text-align:center;font-size:15px;font-weight:700;line-height:22px}
 .mg-creator-card__meta{height:34px;padding:0 9px;display:flex;align-items:center;justify-content:space-between}
-.mg-creator-card__rating{color:#d3ad28;font-size:13px}
-.mg-creator-card__heart{color:#ed5570;font-size:18px}
+.mg-creator-card__rating{color:#3d3d3d;font-size:11px}
+.mg-creator-card__heart{color:#ed1c24;font-size:12px}
 .mg-creator-state{display:block;padding:20px;text-align:center;color:#777}
 .mg-creator-scroll .pagination{margin:8px 18px 18px}
 .mg-creator-scroll__safe{height:22px}
 
 .mg-upload-header__title{display:block;padding-left:36px;font-size:17px;font-weight:600;line-height:54px}
 .mg-upload-preview{width:354px;height:calc(100vh - 295px);min-height:320px;margin-left:11px;position:relative;overflow:hidden;background:#748d72}
-.mg-upload-preview__reference{width:375px;height:812px;position:absolute;left:-11px;top:-98px}
+.mg-upload-preview__video{width:100%;height:100%;position:absolute;inset:0;background:#111}
+.mg-upload-preview__empty{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#eef5ed;background:linear-gradient(145deg,#6d866b,#435843)}
+.mg-upload-preview__empty-icon{width:54px;height:54px;margin-bottom:12px;border:1px solid rgba(255,255,255,.7);border-radius:50%;font-size:34px;line-height:50px;text-align:center}
 .mg-upload-preview__selected{padding:10px 15px;position:absolute;left:18px;right:18px;bottom:22px;border-radius:9px;background:rgba(0,0,0,.52);color:#fff;font-size:11px}
 .mg-upload-preview__selected text{display:block}
 .mg-upload-controls{height:99px;display:flex;align-items:center;background:#d8d8d8}

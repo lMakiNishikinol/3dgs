@@ -7,7 +7,11 @@ import type { UserProfile } from '@/types/api'
 
 export default function ProfileEditPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
-  useEffect(() => { void fetchUserProfile('user-current').then(setProfile) }, [])
+  useEffect(() => {
+    void fetchUserProfile('user-current').then(setProfile).catch((error) => {
+      void Taro.showToast({ title: error instanceof Error ? error.message : '资料加载失败', icon: 'none' })
+    })
+  }, [])
   const rows = [
     { label: '头像', value: '', avatar: true },
     { label: '昵称', value: profile?.name ?? '' },
